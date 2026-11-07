@@ -1,0 +1,8 @@
+{
+  "/api": {
+    "target": "https://medkitapi.integratedsolutions.care:7341",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "info"
+  }
+}

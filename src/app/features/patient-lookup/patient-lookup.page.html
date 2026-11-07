@@ -1,0 +1,49 @@
+<section class="intro">
+  <h1>Patient lookup</h1>
+  <p>Enter the patient's national ID or Iqama number to see their details from Fakeeh HIS and their Medical KIT device readings.</p>
+</section>
+
+<mat-card appearance="outlined" class="search-card">
+  <mk-national-id-search [loading]="store.loading()" (searched)="store.search($event)" />
+  @if (store.loading()) {
+    <mat-progress-bar mode="indeterminate" class="progress" />
+  }
+</mat-card>
+
+@switch (store.status()) {
+  @case ('idle') {
+    <mk-empty-state icon="person_search" title="No patient selected" message="Search by national ID or Iqama to get started." />
+  }
+  @case ('not-found') {
+    <mk-empty-state
+      icon="person_off"
+      title="No patient found"
+      [message]="'Fakeeh HIS has no patient with ID ' + store.searchedId() + '. Check the number and try again.'"
+    />
+  }
+  @case ('error') {
+    <mk-empty-state icon="error" tone="error" title="Could not look up the patient" [message]="store.error()">
+      <button mat-stroked-button class="retry" (click)="store.search(store.searchedId()!)">Try again</button>
+    </mk-empty-state>
+  }
+  @case ('found') {
+    @if (store.patient(); as patient) {
+      <div class="result">
+        <mk-patient-header [patient]="patient" />
+
+        <mat-card appearance="outlined" class="tabs-card">
+          <mat-tab-group animationDuration="150ms" mat-stretch-tabs="false" mat-align-tabs="start">
+            <mat-tab label="Patient info">
+              <mk-patient-info-tab [patient]="patient" />
+            </mat-tab>
+            <mat-tab label="Device readings">
+              <ng-template matTabContent>
+                <mk-readings-tab [nationalId]="patient.identifierValue" />
+              </ng-template>
+            </mat-tab>
+          </mat-tab-group>
+        </mat-card>
+      </div>
+    }
+  }
+}

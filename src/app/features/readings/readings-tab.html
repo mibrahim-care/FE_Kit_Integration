@@ -1,0 +1,103 @@
+<div class="toolbar">
+  <mat-form-field appearance="outline" class="filter" subscriptSizing="dynamic">
+    <mat-label>Vital type</mat-label>
+    <mat-select [value]="store.vitalTypeCode()" (selectionChange)="store.filterByType($event.value)">
+      <mat-option [value]="undefined">All types</mat-option>
+      @for (type of store.types(); track type.code) {
+        <mat-option [value]="type.code">{{ type.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="per-type" subscriptSizing="dynamic">
+    <mat-label>Latest per type</mat-label>
+    <mat-select [value]="store.recordsPerType()" (selectionChange)="store.changeRecordsPerType($event.value)">
+      @for (count of recordsPerTypeOptions; track count) {
+        <mat-option [value]="count">{{ count }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <span class="count">
+    @if (!store.loading() && !store.error()) {
+      {{ store.total() }} {{ store.total() === 1 ? 'reading' : 'readings' }}
+    }
+  </span>
+
+  <button mat-icon-button (click)="store.refresh()" matTooltip="Refresh" aria-label="Refresh readings">
+    <mat-icon>refresh</mat-icon>
+  </button>
+</div>
+
+<div class="table-wrap">
+  @if (store.loading()) {
+    <mat-progress-bar mode="indeterminate" class="progress" />
+  }
+
+  @if (store.error(); as error) {
+    <mk-empty-state icon="error" tone="error" title="Could not load the readings" [message]="error">
+      <button mat-stroked-button class="retry" (click)="store.refresh()">Try again</button>
+    </mk-empty-state>
+  } @else if (store.isEmpty()) {
+    <mk-empty-state
+      icon="monitor_heart"
+      title="No device readings"
+      [message]="store.vitalTypeCode() ? 'No readings of this type yet.' : 'The Medical KIT has not sent any readings for this patient yet.'"
+    />
+  } @else {
+    <div class="scroll">
+      <table mat-table [dataSource]="store.rows()" class="table">
+        <ng-container matColumnDef="effective">
+          <th mat-header-cell *matHeaderCellDef>Taken at</th>
+          <td mat-cell *matCellDef="let row" class="nowrap">{{ row.effective | date: 'dd MMM yyyy, HH:mm' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Vital type</th>
+          <td mat-cell *matCellDef="let row">{{ row.typeLabel }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="value">
+          <th mat-header-cell *matHeaderCellDef>Value</th>
+          <td mat-cell *matCellDef="let row" class="value">{{ row.value }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="unit">
+          <th mat-header-cell *matHeaderCellDef>Unit</th>
+          <td mat-cell *matCellDef="let row" class="nowrap">{{ row.unit || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="flag">
+          <th mat-header-cell *matHeaderCellDef>Flag</th>
+          <td mat-cell *matCellDef="let row">
+            @if (row.abnormal === true) {
+              <span class="flag abnormal">Abnormal</span>
+            } @else if (row.abnormal === false) {
+              <span class="flag normal">Normal</span>
+            } @else {
+              <span class="muted">—</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="notes">
+          <th mat-header-cell *matHeaderCellDef>Notes</th>
+          <td mat-cell *matCellDef="let row" class="notes">
+            @if (row.note) {
+              <div dir="auto">{{ row.note }}</div>
+            }
+            @if (row.address) {
+              <div class="address" dir="auto"><mat-icon>place</mat-icon>{{ row.address }}</div>
+            }
+            @if (!row.note && !row.address) {
+              <span class="muted">—</span>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns"></tr>
+      </table>
+    </div>
+  }
+</div>

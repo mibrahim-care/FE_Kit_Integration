@@ -1,6 +1,6 @@
 {
   "/fhir": {
-    "target": "http://localhost:83",
+    "target": "https://phones-affair-testament-cos.trycloudflare.com",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "info"

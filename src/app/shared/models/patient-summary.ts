@@ -1,4 +1,4 @@
-import { PatientInfo } from './api';
+import { FhirSystems, Patient } from './fhir';
 
 export interface PatientSummary {
   fullName: string;
@@ -14,18 +14,28 @@ export interface PatientSummary {
   city?: string;
 }
 
-export function toPatientSummary(patient: PatientInfo): PatientSummary {
+/** Maps the FHIR Patient returned by POST /fhir/Patient/_search. */
+export function toPatientSummary(patient: Patient): PatientSummary {
+  const identifiers = patient.identifier ?? [];
+  const iqama = identifiers.find((i) => i.system === FhirSystems.iqama);
+  const nationalId = identifiers.find((i) => i.system === FhirSystems.nationalId);
+  const official = patient.name?.find((n) => n.use === 'official') ?? patient.name?.find((n) => n.use !== 'usual');
+  const arabic = patient.name?.find((n) => n.use === 'usual');
+  const nationality = patient.extension
+    ?.find((e) => e.url === FhirSystems.nationality)
+    ?.extension?.find((e) => e.url === 'code')?.valueCodeableConcept;
+
   return {
-    fullName: [patient.firstName, patient.middleName, patient.familyName].filter(Boolean).join(' '),
-    arabicName: patient.fullNameArabic ?? undefined,
-    identifierLabel: patient.identifierType === 'iqama' ? 'Iqama' : 'National ID',
-    identifierValue: patient.nationalId,
-    mrn: patient.mrn ?? undefined,
+    fullName: official?.text ?? [...(official?.given ?? []), official?.family].filter(Boolean).join(' '),
+    arabicName: arabic?.text,
+    identifierLabel: iqama && !nationalId ? 'Iqama' : 'National ID',
+    identifierValue: (iqama ?? nationalId)?.value ?? patient.id ?? '',
+    mrn: identifiers.find((i) => i.system === FhirSystems.mrn)?.value,
     gender: patient.gender && patient.gender !== 'unknown' ? patient.gender : undefined,
-    birthDate: patient.birthDate ?? undefined,
-    phone: patient.phone ?? undefined,
-    email: patient.email ?? undefined,
-    nationality: patient.nationality ?? undefined,
-    city: patient.city ?? undefined,
+    birthDate: patient.birthDate,
+    phone: patient.telecom?.find((t) => t.system === 'phone')?.value,
+    email: patient.telecom?.find((t) => t.system === 'email')?.value,
+    nationality: nationality?.text ?? nationality?.coding?.[0]?.display,
+    city: patient.address?.find((a) => a.city)?.city,
   };
 }

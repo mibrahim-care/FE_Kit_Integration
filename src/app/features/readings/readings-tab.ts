@@ -32,7 +32,8 @@ export class ReadingsTab {
 
   protected readonly store = inject(ReadingsStore);
   protected readonly columns = ['effective', 'type', 'value', 'unit', 'flag', 'notes'];
-  protected readonly recordsPerTypeOptions = [1, 5, 10, 20, 50];
+  // The API returns at most 100 readings per search.
+  protected readonly countOptions = [10, 20, 50, 100];
 
   constructor() {
     effect(() => {

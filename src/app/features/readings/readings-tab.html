@@ -10,9 +10,9 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline" class="per-type" subscriptSizing="dynamic">
-    <mat-label>Latest per type</mat-label>
-    <mat-select [value]="store.recordsPerType()" (selectionChange)="store.changeRecordsPerType($event.value)">
-      @for (count of recordsPerTypeOptions; track count) {
+    <mat-label>Show latest</mat-label>
+    <mat-select [value]="store.count()" (selectionChange)="store.changeCount($event.value)">
+      @for (count of countOptions; track count) {
         <mat-option [value]="count">{{ count }}</mat-option>
       }
     </mat-select>
@@ -20,7 +20,11 @@
 
   <span class="count">
     @if (!store.loading() && !store.error()) {
-      {{ store.total() }} {{ store.total() === 1 ? 'reading' : 'readings' }}
+      @if (store.shown() < store.total()) {
+        {{ store.shown() }} of {{ store.total() }} readings
+      } @else {
+        {{ store.total() }} {{ store.total() === 1 ? 'reading' : 'readings' }}
+      }
     }
   </span>
 

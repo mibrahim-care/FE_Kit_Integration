@@ -4,7 +4,7 @@ import { appConfig } from './app/app.config';
 import { environment } from './environments/environment';
 
 /**
- * Deployment settings (apiBaseUrl, apiKey) can be changed on the server without a rebuild by editing
+ * Deployment settings (fhirBaseUrl, apiKey) can be changed on the server without a rebuild by editing
  * config.json next to index.html. Missing or invalid config.json: the built-in environment values are used.
  */
 async function loadRuntimeConfig(): Promise<void> {
@@ -15,8 +15,8 @@ async function loadRuntimeConfig(): Promise<void> {
     }
 
     const config = (await response.json()) as Partial<typeof environment>;
-    if (typeof config.apiBaseUrl === 'string' && config.apiBaseUrl.trim()) {
-      environment.apiBaseUrl = config.apiBaseUrl.trim().replace(/\/+$/, '');
+    if (typeof config.fhirBaseUrl === 'string' && config.fhirBaseUrl.trim()) {
+      environment.fhirBaseUrl = config.fhirBaseUrl.trim().replace(/\/+$/, '');
     }
     if (typeof config.apiKey === 'string') {
       environment.apiKey = config.apiKey;

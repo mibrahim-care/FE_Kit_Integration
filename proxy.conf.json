@@ -1,7 +1,7 @@
 {
-  "/api": {
-    "target": "https://medkitapi.integratedsolutions.care:7341",
-    "secure": true,
+  "/fhir": {
+    "target": "http://localhost:83",
+    "secure": false,
     "changeOrigin": true,
     "logLevel": "info"
   }

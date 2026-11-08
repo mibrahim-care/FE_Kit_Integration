@@ -1,6 +1,6 @@
 {
   "/fhir": {
-    "target": "https://phones-affair-testament-cos.trycloudflare.com",
+    "target": "https://wide-dishes-automation-watts.trycloudflare.com",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "info"

@@ -1,7 +1,7 @@
 {
   "/fhir": {
-    "target": "https://wide-dishes-automation-watts.trycloudflare.com",
-    "secure": false,
+    "target": "https://medkitapi.integratedsolutions.care:7341",
+    "secure": true,
     "changeOrigin": true,
     "logLevel": "info"
   }
